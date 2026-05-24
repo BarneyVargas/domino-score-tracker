@@ -1,8 +1,17 @@
 import { ChevronRight, History, Users } from "lucide-react"
+import { useState } from "react"
 
 import { AnimatedNumberFlow } from "@/components/animated-number-flow"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Drawer,
   DrawerContent,
@@ -18,6 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   groupOptions,
   scoreOptions,
@@ -41,6 +51,18 @@ export function TopControls({
   onGroupCountChange,
   onDeleteHistory,
 }: TopControlsProps) {
+  const [customScoreInput, setCustomScoreInput] = useState("")
+  const [showCustomScoreDialog, setShowCustomScoreDialog] = useState(false)
+
+  function handleCustomScoreSubmit() {
+    const customScore = Number(customScoreInput)
+    if (customScore > 0) {
+      onScoreTargetChange(customScore)
+      setCustomScoreInput("")
+      setShowCustomScoreDialog(false)
+    }
+  }
+
   return (
     <>
       <div className="fixed top-4 right-4 left-4 z-50 flex items-center justify-between">
@@ -126,6 +148,9 @@ export function TopControls({
                 {score}
               </DropdownMenuItem>
             ))}
+            <DropdownMenuItem onClick={() => setShowCustomScoreDialog(true)}>
+              +
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -155,6 +180,52 @@ export function TopControls({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <Dialog
+        open={showCustomScoreDialog}
+        onOpenChange={setShowCustomScoreDialog}
+      >
+        <DialogContent showCloseButton={false}>
+          <DialogHeader className="items-center text-center">
+            <DialogTitle className="text-xl">Custom Score Target</DialogTitle>
+          </DialogHeader>
+
+          <Input
+            autoFocus
+            value={customScoreInput}
+            onChange={(event) =>
+              setCustomScoreInput(event.target.value.replace(/\D/g, ""))
+            }
+            inputMode="numeric"
+            pattern="[0-9]*"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && customScoreInput) {
+                handleCustomScoreSubmit()
+              }
+            }}
+            placeholder="Enter score"
+            aria-label="Custom score"
+            className="h-12 text-center text-2xl"
+          />
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                variant="destructive"
+                onClick={() => setShowCustomScoreDialog(false)}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              onClick={handleCustomScoreSubmit}
+              disabled={!customScoreInput}
+            >
+              Set
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

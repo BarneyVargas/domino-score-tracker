@@ -91,7 +91,35 @@ export function ScoreDialog({
           aria-label="Score"
           className="h-12 text-center text-2xl"
         />
-
+        <div className="grid grid-cols-3 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              onScoreInputChange(String(Number(scoreInput || 0) + 1))
+            }
+          >
+            +1
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              onScoreInputChange(String(Number(scoreInput || 0) + 5))
+            }
+          >
+            +5
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              onScoreInputChange(String(Number(scoreInput || 0) + 10))
+            }
+          >
+            +10
+          </Button>
+        </div>
         <DialogFooter>
           {editingScoreId && (
             <Button variant="destructive" onClick={onDeleteScore}>
