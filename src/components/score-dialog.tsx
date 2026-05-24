@@ -77,6 +77,7 @@ export function ScoreDialog({
         </DialogHeader>
 
         <Input
+          autoFocus
           value={scoreInput}
           onChange={(event) => onScoreInputChange(event.target.value)}
           inputMode="numeric"

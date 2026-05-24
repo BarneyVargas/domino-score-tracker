@@ -178,12 +178,10 @@ export function App() {
   }
 
   function handleRestart() {
-    setCustomGroupNames({})
     setScoreEntries([])
     setWinnerName(null)
     closeScoreDialog()
 
-    window.localStorage.removeItem(groupNamesStorageKey)
     window.localStorage.removeItem(scoreEntriesStorageKey)
   }
 
@@ -239,7 +237,7 @@ export function App() {
 
       <WinnerDialog winnerName={winnerName} onRestart={handleRestart} />
 
-      <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2">
+      <div className="fixed bottom-12 left-1/2 z-40 -translate-x-1/2">
         <Button
           variant="destructive"
           size="lg"
