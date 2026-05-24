@@ -72,6 +72,12 @@ export function ScoreGrid({
                     <AnimatedNumberFlow value={groupScoreTotal} /> /{" "}
                     <AnimatedNumberFlow value={scoreTarget} />
                   </div>
+                  <div className="mt-1 border-t border-secondary-foreground/20 pt-1 text-xs font-medium text-muted-foreground">
+                    Remaining:{" "}
+                    <AnimatedNumberFlow
+                      value={Math.max(0, scoreTarget - groupScoreTotal)}
+                    />
+                  </div>
                 </div>
               </div>
             )}

@@ -112,7 +112,7 @@ export function App() {
       return
     }
 
-    const nextScoreEntries = editingScoreId
+    let nextScoreEntries = editingScoreId
       ? scoreEntries.map((entry) =>
           entry.id === editingScoreId ? { ...entry, score: scoreInput } : entry
         )
@@ -124,6 +124,22 @@ export function App() {
             score: scoreInput,
           },
         ]
+
+    // When adding a new score (not editing), add 0 for all other groups
+    if (!editingScoreId) {
+      for (let i = 0; i < groupCount; i++) {
+        if (i !== selectedGroupIndex) {
+          nextScoreEntries = [
+            ...nextScoreEntries,
+            {
+              id: crypto.randomUUID(),
+              groupIndex: i,
+              score: "0",
+            },
+          ]
+        }
+      }
+    }
 
     setScoreEntries(nextScoreEntries)
     window.localStorage.setItem(
