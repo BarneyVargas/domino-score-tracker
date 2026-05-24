@@ -99,7 +99,7 @@ export function ScoreDialog({
             </Button>
           )}
           <DialogClose asChild>
-            <Button variant="outline" onClick={onCancel}>
+            <Button variant="destructive" onClick={onCancel}>
               Cancel
             </Button>
           </DialogClose>
