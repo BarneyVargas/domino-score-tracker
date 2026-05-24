@@ -1,21 +1,27 @@
-# React + TypeScript + Vite + shadcn/ui
+# Domino Tracker
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+Domino Tracker is a simple web app built to track scores in a domino game.
 
-## Adding components
+## About
 
-To add components to your app, run the following command:
+This project was created to make it easier to keep track of scores while playing dominoes with friends. Instead of using pen and paper, everything is handled digitally in the app.
 
-```bash
-npx shadcn@latest add button
-```
+## Features
 
-This will place the ui components in the `src/components` directory.
+- Track scores for domino games
+- Simple and easy-to-use interface
+- Fast updates during gameplay
 
-## Using components
+## Tech Stack
 
-To use the components in your app, import them as follows:
+- TypeScript
+- React
+- Built with help from ChatGPT Codex
 
-```tsx
-import { Button } from "@/components/ui/button"
-```
+## Purpose
+
+This project was built as a learning exercise and a practical tool for tracking domino games.
+
+## License
+
+Free to use and modify.
