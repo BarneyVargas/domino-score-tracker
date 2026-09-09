@@ -4,6 +4,16 @@ import { OpeningAnimation } from "@/components/opening-animation"
 import { ScoreDialog } from "@/components/score-dialog"
 import { ScoreGrid } from "@/components/score-grid"
 import { TopControls } from "@/components/top-controls"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { WinnerDialog } from "@/components/winner-dialog"
 import {
@@ -41,6 +51,7 @@ export function App() {
   const [isRenaming, setIsRenaming] = useState(false)
   const [nameInput, setNameInput] = useState("")
   const [winnerName, setWinnerName] = useState<string | null>(null)
+  const [showRestartConfirmation, setShowRestartConfirmation] = useState(false)
 
   const groupNames = Array.from(
     { length: groupCount },
@@ -112,16 +123,29 @@ export function App() {
       return
     }
 
+    const selectedGroupTotalWithoutCurrentEntry = scoreEntries
+      .filter(
+        (entry) =>
+          entry.groupIndex === selectedGroupIndex && entry.id !== editingScoreId
+      )
+      .reduce((total, entry) => total + Number(entry.score), 0)
+    const cappedScore = String(
+      Math.min(
+        Number(scoreInput),
+        Math.max(0, scoreTarget - selectedGroupTotalWithoutCurrentEntry)
+      )
+    )
+
     let nextScoreEntries = editingScoreId
       ? scoreEntries.map((entry) =>
-          entry.id === editingScoreId ? { ...entry, score: scoreInput } : entry
+          entry.id === editingScoreId ? { ...entry, score: cappedScore } : entry
         )
       : [
           ...scoreEntries,
           {
             id: crypto.randomUUID(),
             groupIndex: selectedGroupIndex,
-            score: scoreInput,
+            score: cappedScore,
           },
         ]
 
@@ -258,11 +282,32 @@ export function App() {
           variant="destructive"
           size="lg"
           className="h-12 px-8 text-base"
-          onClick={handleRestart}
+          onClick={() => setShowRestartConfirmation(true)}
         >
           Restart
         </Button>
       </div>
+
+      <AlertDialog
+        open={showRestartConfirmation}
+        onOpenChange={setShowRestartConfirmation}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restart this game?</AlertDialogTitle>
+            <AlertDialogDescription>
+              All current scores will be cleared. Your completed game history
+              will stay saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleRestart}>
+              Restart game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

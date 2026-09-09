@@ -1,8 +1,19 @@
-import { ChevronRight, History, Users } from "lucide-react"
+import { ChevronRight, History, Trash2Icon, Users } from "lucide-react"
 import { useState } from "react"
 
 import { AnimatedNumberFlow } from "@/components/animated-number-flow"
 import { ModeToggle } from "@/components/mode-toggle"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -53,6 +64,8 @@ export function TopControls({
 }: TopControlsProps) {
   const [customScoreInput, setCustomScoreInput] = useState("")
   const [showCustomScoreDialog, setShowCustomScoreDialog] = useState(false)
+  const [showDeleteHistoryConfirmation, setShowDeleteHistoryConfirmation] =
+    useState(false)
 
   function handleCustomScoreSubmit() {
     const customScore = Number(customScoreInput)
@@ -114,7 +127,7 @@ export function TopControls({
               <Button
                 variant="destructive"
                 disabled={gameHistory.length === 0}
-                onClick={onDeleteHistory}
+                onClick={() => setShowDeleteHistoryConfirmation(true)}
               >
                 Delete History
               </Button>
@@ -226,6 +239,33 @@ export function TopControls({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={showDeleteHistoryConfirmation}
+        onOpenChange={setShowDeleteHistoryConfirmation}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+              <Trash2Icon />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete game history?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes all saved completed games from this device. This
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={onDeleteHistory}
+            >
+              Delete history
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
