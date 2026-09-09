@@ -20,7 +20,7 @@ export function ScoreGrid({
   onEditScore,
 }: ScoreGridProps) {
   return (
-    <div className="mx-auto mt-30 grid w-full max-w-sm grid-cols-2 items-start gap-3 px-4">
+    <div className="mx-auto mt-30 pb-28 grid w-full max-w-sm grid-cols-2 items-start gap-3 px-4">
       {groupNames.map((groupName, index) => {
         const groupScoreEntries = scoreEntries.filter(
           (entry) => entry.groupIndex === index
