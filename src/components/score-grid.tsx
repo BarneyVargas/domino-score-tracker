@@ -22,7 +22,7 @@ export function ScoreGrid({
   onEditScore,
 }: ScoreGridProps) {
   return (
-    <div className="mx-auto mt-30 pb-28 grid w-full max-w-sm grid-cols-2 items-start gap-3 px-4">
+    <div className="mx-auto mt-30 grid w-full max-w-sm grid-cols-2 items-start gap-3 px-4 pb-36">
       {scoreEntries.length === 0 && (
         <p className="col-span-full text-center text-sm text-muted-foreground">
           Tap a group to add the first score.

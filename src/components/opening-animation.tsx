@@ -32,7 +32,7 @@ export function OpeningAnimation() {
         <img
           src="/opening_animation.gif"
           alt=""
-          className="h-auto w-full dark:mix-blend-screen"
+          className="h-auto w-full dark:mix-blend-lighten"
         />
         <div className="pointer-events-none absolute inset-y-0 left-0 w-[28%] bg-linear-to-r from-background to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-[28%] bg-linear-to-l from-background to-transparent" />
