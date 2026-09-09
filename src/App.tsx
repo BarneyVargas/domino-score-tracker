@@ -1,3 +1,4 @@
+import { Undo2 } from "lucide-react"
 import { useState } from "react"
 
 import { OpeningAnimation } from "@/components/opening-animation"
@@ -22,20 +23,20 @@ import {
   getStoredGameHistory,
   getStoredGroupNames,
   getStoredOption,
+  getStoredScoreTarget,
   getStoredScoreEntries,
   groupCountStorageKey,
   groupNamesStorageKey,
   groupOptions,
   maxGameHistoryEntries,
   scoreEntriesStorageKey,
-  scoreOptions,
   scoreTargetStorageKey,
   type ScoreEntry,
 } from "@/lib/domino-storage"
 
 export function App() {
   const [scoreTarget, setScoreTarget] = useState(() =>
-    getStoredOption(scoreTargetStorageKey, scoreOptions, scoreOptions[0])
+    getStoredScoreTarget()
   )
   const [groupCount, setGroupCount] = useState(() =>
     getStoredOption(groupCountStorageKey, groupOptions, groupOptions[0])
@@ -61,13 +62,47 @@ export function App() {
     selectedGroupIndex === null ? "" : groupNames[selectedGroupIndex]
 
   function handleScoreTargetChange(score: number) {
+    const groupTotals = new Map<number, number>()
+    const nextScoreEntries = scoreEntries.map((entry) => {
+      const groupTotal = groupTotals.get(entry.groupIndex) ?? 0
+      const cappedScore = Math.min(
+        Number(entry.score),
+        Math.max(0, score - groupTotal)
+      )
+
+      groupTotals.set(entry.groupIndex, groupTotal + cappedScore)
+      return { ...entry, score: String(cappedScore) }
+    })
+
     setScoreTarget(score)
     window.localStorage.setItem(scoreTargetStorageKey, String(score))
+    setScoreEntries(nextScoreEntries)
+    window.localStorage.setItem(
+      scoreEntriesStorageKey,
+      JSON.stringify(nextScoreEntries)
+    )
   }
 
   function handleGroupCountChange(groups: number) {
+    if (groups === groupCount) {
+      return
+    }
+
+    const nextGroupNames = Object.fromEntries(
+      Object.entries(customGroupNames).filter(
+        ([index]) => Number(index) < groups
+      )
+    ) as Record<number, string>
+
     setGroupCount(groups)
     window.localStorage.setItem(groupCountStorageKey, String(groups))
+    setCustomGroupNames(nextGroupNames)
+    window.localStorage.setItem(
+      groupNamesStorageKey,
+      JSON.stringify(nextGroupNames)
+    )
+    setScoreEntries([])
+    window.localStorage.removeItem(scoreEntriesStorageKey)
   }
 
   function openScoreDialog(index: number) {
@@ -136,6 +171,7 @@ export function App() {
       )
     )
 
+    const roundId = crypto.randomUUID()
     let nextScoreEntries = editingScoreId
       ? scoreEntries.map((entry) =>
           entry.id === editingScoreId ? { ...entry, score: cappedScore } : entry
@@ -144,6 +180,7 @@ export function App() {
           ...scoreEntries,
           {
             id: crypto.randomUUID(),
+            roundId,
             groupIndex: selectedGroupIndex,
             score: cappedScore,
           },
@@ -157,6 +194,7 @@ export function App() {
             ...nextScoreEntries,
             {
               id: crypto.randomUUID(),
+              roundId,
               groupIndex: i,
               score: "0",
             },
@@ -205,8 +243,15 @@ export function App() {
       return
     }
 
+    const roundId = scoreEntries.find(
+      (entry) => entry.id === editingScoreId
+    )?.roundId
+    if (!roundId) {
+      return
+    }
+
     const nextScoreEntries = scoreEntries.filter(
-      (entry) => entry.id !== editingScoreId
+      (entry) => entry.roundId !== roundId
     )
 
     setScoreEntries(nextScoreEntries)
@@ -225,6 +270,24 @@ export function App() {
     window.localStorage.removeItem(scoreEntriesStorageKey)
   }
 
+  function handleUndoLastRound() {
+    const latestRoundId = scoreEntries.at(-1)?.roundId
+
+    if (!latestRoundId) {
+      return
+    }
+
+    const nextScoreEntries = scoreEntries.filter(
+      (entry) => entry.roundId !== latestRoundId
+    )
+
+    setScoreEntries(nextScoreEntries)
+    window.localStorage.setItem(
+      scoreEntriesStorageKey,
+      JSON.stringify(nextScoreEntries)
+    )
+  }
+
   function handleDeleteHistory() {
     setGameHistory([])
     window.localStorage.removeItem(gameHistoryStorageKey)
@@ -238,6 +301,7 @@ export function App() {
         scoreTarget={scoreTarget}
         groupCount={groupCount}
         gameHistory={gameHistory}
+        hasScores={scoreEntries.length > 0}
         onScoreTargetChange={handleScoreTargetChange}
         onGroupCountChange={handleGroupCountChange}
         onDeleteHistory={handleDeleteHistory}
@@ -275,9 +339,21 @@ export function App() {
         onCancel={closeScoreDialog}
       />
 
-      <WinnerDialog winnerName={winnerName} onRestart={handleRestart} />
+      {winnerName !== null && (
+        <WinnerDialog winnerName={winnerName} onRestart={handleRestart} />
+      )}
 
-      <div className="fixed bottom-12 left-1/2 z-40 -translate-x-1/2">
+      <div className="fixed bottom-12 left-1/2 z-40 flex -translate-x-1/2 gap-2">
+        <Button
+          variant="outline"
+          size="lg"
+          className="h-12 px-4 text-base"
+          disabled={scoreEntries.length === 0}
+          onClick={handleUndoLastRound}
+        >
+          <Undo2 />
+          Undo round
+        </Button>
         <Button
           variant="destructive"
           size="lg"

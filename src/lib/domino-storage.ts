@@ -9,6 +9,7 @@ export const maxGameHistoryEntries = 10
 
 export type ScoreEntry = {
   id: string
+  roundId: string
   groupIndex: number
   score: string
 }
@@ -30,6 +31,15 @@ export function getStoredOption(
   const parsedValue = storedValue ? Number(storedValue) : NaN
 
   return options.includes(parsedValue) ? parsedValue : fallback
+}
+
+export function getStoredScoreTarget() {
+  const storedValue = window.localStorage.getItem(scoreTargetStorageKey)
+  const parsedValue = storedValue ? Number(storedValue) : NaN
+
+  return Number.isSafeInteger(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : scoreOptions[0]
 }
 
 export function getDefaultGroupName(index: number) {
@@ -74,8 +84,10 @@ export function getStoredScoreEntries() {
       return []
     }
 
-    return parsedValue.filter(
-      (entry): entry is ScoreEntry =>
+    const roundCounts: Record<number, number> = {}
+
+    return parsedValue.flatMap((entry) => {
+      if (
         entry &&
         typeof entry === "object" &&
         "id" in entry &&
@@ -84,7 +96,25 @@ export function getStoredScoreEntries() {
         typeof entry.id === "string" &&
         typeof entry.groupIndex === "number" &&
         typeof entry.score === "string"
-    )
+      ) {
+        const roundIndex = roundCounts[entry.groupIndex] ?? 0
+        roundCounts[entry.groupIndex] = roundIndex + 1
+
+        return [
+          {
+            id: entry.id,
+            groupIndex: entry.groupIndex,
+            score: entry.score,
+            roundId:
+              "roundId" in entry && typeof entry.roundId === "string"
+                ? entry.roundId
+                : `legacy-round-${roundIndex}`,
+          },
+        ]
+      }
+
+      return []
+    })
   } catch {
     return []
   }

@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/drawer"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -49,6 +50,7 @@ type TopControlsProps = {
   scoreTarget: number
   groupCount: number
   gameHistory: GameHistoryEntry[]
+  hasScores: boolean
   onScoreTargetChange: (score: number) => void
   onGroupCountChange: (groups: number) => void
   onDeleteHistory: () => void
@@ -58,6 +60,7 @@ export function TopControls({
   scoreTarget,
   groupCount,
   gameHistory,
+  hasScores,
   onScoreTargetChange,
   onGroupCountChange,
   onDeleteHistory,
@@ -66,11 +69,43 @@ export function TopControls({
   const [showCustomScoreDialog, setShowCustomScoreDialog] = useState(false)
   const [showDeleteHistoryConfirmation, setShowDeleteHistoryConfirmation] =
     useState(false)
+  const [pendingScoreTarget, setPendingScoreTarget] = useState<number | null>(
+    null
+  )
+  const [pendingGroupCount, setPendingGroupCount] = useState<number | null>(
+    null
+  )
+
+  function requestScoreTargetChange(score: number) {
+    if (score === scoreTarget) {
+      return
+    }
+
+    if (hasScores) {
+      setPendingScoreTarget(score)
+      return
+    }
+
+    onScoreTargetChange(score)
+  }
+
+  function requestGroupCountChange(groups: number) {
+    if (groups === groupCount) {
+      return
+    }
+
+    if (hasScores) {
+      setPendingGroupCount(groups)
+      return
+    }
+
+    onGroupCountChange(groups)
+  }
 
   function handleCustomScoreSubmit() {
     const customScore = Number(customScoreInput)
     if (customScore > 0) {
-      onScoreTargetChange(customScore)
+      requestScoreTargetChange(customScore)
       setCustomScoreInput("")
       setShowCustomScoreDialog(false)
     }
@@ -111,7 +146,10 @@ export function TopControls({
                         className="text-xs text-muted-foreground"
                         dateTime={entry.playedAt}
                       >
-                        {new Date(entry.playedAt).toLocaleDateString()}
+                        {new Date(entry.playedAt).toLocaleString([], {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
                       </time>
                     </div>
                   ))}
@@ -154,12 +192,13 @@ export function TopControls({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-24">
             {scoreOptions.map((score) => (
-              <DropdownMenuItem
+              <DropdownMenuCheckboxItem
                 key={score}
-                onClick={() => onScoreTargetChange(score)}
+                checked={scoreTarget === score}
+                onSelect={() => requestScoreTargetChange(score)}
               >
                 {score}
-              </DropdownMenuItem>
+              </DropdownMenuCheckboxItem>
             ))}
             <DropdownMenuItem onClick={() => setShowCustomScoreDialog(true)}>
               +
@@ -183,12 +222,13 @@ export function TopControls({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-24">
             {groupOptions.map((groups) => (
-              <DropdownMenuItem
+              <DropdownMenuCheckboxItem
                 key={groups}
-                onClick={() => onGroupCountChange(groups)}
+                checked={groupCount === groups}
+                onSelect={() => requestGroupCountChange(groups)}
               >
                 {groups}
-              </DropdownMenuItem>
+              </DropdownMenuCheckboxItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -262,6 +302,68 @@ export function TopControls({
               onClick={onDeleteHistory}
             >
               Delete history
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={pendingScoreTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingScoreTarget(null)
+          }
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change score target?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Current scores will be kept, but any totals above the new target
+              will be capped.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingScoreTarget !== null) {
+                  onScoreTargetChange(pendingScoreTarget)
+                }
+              }}
+            >
+              Change target
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={pendingGroupCount !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingGroupCount(null)
+          }
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change number of groups?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This starts a fresh game and clears all current scores.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                if (pendingGroupCount !== null) {
+                  onGroupCountChange(pendingGroupCount)
+                }
+              }}
+            >
+              Change groups
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
