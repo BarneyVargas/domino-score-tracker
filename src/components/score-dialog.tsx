@@ -64,7 +64,15 @@ export function ScoreDialog({
         <DialogContent showCloseButton={false}>
           <DialogHeader className="items-center text-center">
           {isRenaming ? (
-            <div className="flex w-full items-center gap-2">
+            <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-2">
+              <div className="invisible flex items-center gap-2" aria-hidden>
+                <Button size="sm">Save</Button>
+                {editingScoreId && (
+                  <Button variant="destructive" size="icon">
+                    <Trash2Icon />
+                  </Button>
+                )}
+              </div>
               <Input
                 autoFocus
                 value={nameInput}
@@ -75,42 +83,48 @@ export function ScoreDialog({
                   }
                 }}
                 aria-label="Group name"
-                className="h-9 text-center"
+                className="h-9 min-w-0 text-center"
               />
-              <Button size="sm" onClick={onRenameSave}>
-                Save
-              </Button>
-              {editingScoreId && (
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  aria-label="Delete score"
-                  onClick={() => setShowDeleteConfirmation(true)}
-                >
-                  <Trash2Icon />
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={onRenameSave}>
+                  Save
                 </Button>
-              )}
+                {editingScoreId && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    aria-label="Delete score"
+                    onClick={() => setShowDeleteConfirmation(true)}
+                  >
+                    <Trash2Icon />
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="flex w-full items-center gap-2">
-              <DialogTitle className="flex-1 text-center text-xl">
+            <div className="grid w-full grid-cols-[2rem_1fr_2rem] items-center">
+              <span aria-hidden />
+              <DialogTitle className="min-w-0 text-center text-xl">
                 <button
                   type="button"
-                  className="rounded-md px-2 py-1 transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="max-w-full truncate rounded-md px-2 py-1 transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
                   onClick={onRenameStart}
                 >
                   {selectedGroupName}
                 </button>
               </DialogTitle>
-              {editingScoreId && (
+              {editingScoreId ? (
                 <Button
                   variant="destructive"
                   size="icon"
+                  className="justify-self-end"
                   aria-label="Delete score"
                   onClick={() => setShowDeleteConfirmation(true)}
                 >
                   <Trash2Icon />
                 </Button>
+              ) : (
+                <span aria-hidden />
               )}
             </div>
           )}
