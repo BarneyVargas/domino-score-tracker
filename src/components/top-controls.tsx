@@ -51,6 +51,7 @@ type TopControlsProps = {
   groupCount: number
   gameHistory: GameHistoryEntry[]
   hasScores: boolean
+  isGameOver: boolean
   onScoreTargetChange: (score: number) => void
   onGroupCountChange: (groups: number) => void
   onDeleteHistory: () => void
@@ -61,6 +62,7 @@ export function TopControls({
   groupCount,
   gameHistory,
   hasScores,
+  isGameOver,
   onScoreTargetChange,
   onGroupCountChange,
   onDeleteHistory,
@@ -182,6 +184,7 @@ export function TopControls({
               variant="outline"
               size="default"
               className="min-w-16 gap-1 px-2.5"
+              disabled={isGameOver}
             >
               <span>
                 <AnimatedNumberFlow value={scoreTarget} />
@@ -212,6 +215,7 @@ export function TopControls({
               variant="outline"
               size="default"
               className="min-w-16 gap-1 px-2.5"
+              disabled={isGameOver}
             >
               <Users />
               <span>

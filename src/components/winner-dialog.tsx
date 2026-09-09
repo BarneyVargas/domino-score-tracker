@@ -1,9 +1,9 @@
 import { Crown } from "lucide-react"
-import { useState } from "react"
 
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -13,24 +13,24 @@ import {
 } from "@/components/ui/alert-dialog"
 
 type WinnerDialogProps = {
+  open: boolean
   winnerName: string
+  onClose: () => void
   onRestart: () => void
 }
 
-export function WinnerDialog({ winnerName, onRestart }: WinnerDialogProps) {
-  const [isOpen, setIsOpen] = useState(true)
-
-  function handleClose() {
-    setIsOpen(false)
-    window.setTimeout(onRestart, 100)
-  }
-
+export function WinnerDialog({
+  open,
+  winnerName,
+  onClose,
+  onRestart,
+}: WinnerDialogProps) {
   return (
     <AlertDialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          handleClose()
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose()
         }
       }}
     >
@@ -44,10 +44,9 @@ export function WinnerDialog({ winnerName, onRestart }: WinnerDialogProps) {
             They reached the selected score target.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="sm:block">
-          <AlertDialogAction className="w-full justify-center">
-            Continue
-          </AlertDialogAction>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Close</AlertDialogCancel>
+          <AlertDialogAction onClick={onRestart}>New game</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

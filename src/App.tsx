@@ -60,8 +60,18 @@ export function App() {
   )
   const selectedGroupName =
     selectedGroupIndex === null ? "" : groupNames[selectedGroupIndex]
+  const isGameOver = groupNames.some((_, index) => {
+    const groupTotal = scoreEntries
+      .filter((entry) => entry.groupIndex === index)
+      .reduce((total, entry) => total + Number(entry.score), 0)
+
+    return groupTotal >= scoreTarget
+  })
 
   function handleScoreTargetChange(score: number) {
+    if (isGameOver) {
+      return
+    }
     const groupTotals = new Map<number, number>()
     const nextScoreEntries = scoreEntries.map((entry) => {
       const groupTotal = groupTotals.get(entry.groupIndex) ?? 0
@@ -84,7 +94,7 @@ export function App() {
   }
 
   function handleGroupCountChange(groups: number) {
-    if (groups === groupCount) {
+    if (isGameOver || groups === groupCount) {
       return
     }
 
@@ -106,6 +116,10 @@ export function App() {
   }
 
   function openScoreDialog(index: number) {
+    if (isGameOver) {
+      return
+    }
+
     setSelectedGroupIndex(index)
     setEditingScoreId(null)
     setScoreInput("")
@@ -114,6 +128,10 @@ export function App() {
   }
 
   function openEditScoreDialog(entry: ScoreEntry) {
+    if (isGameOver) {
+      return
+    }
+
     setSelectedGroupIndex(entry.groupIndex)
     setEditingScoreId(entry.id)
     setScoreInput(entry.score)
@@ -154,7 +172,7 @@ export function App() {
   }
 
   function handleAddScore() {
-    if (selectedGroupIndex === null || !scoreInput) {
+    if (isGameOver || selectedGroupIndex === null || !scoreInput) {
       return
     }
 
@@ -234,12 +252,16 @@ export function App() {
         gameHistoryStorageKey,
         JSON.stringify(nextGameHistory)
       )
-      setWinnerName(nextWinnerName)
+      // Wait for the score dialog to finish closing so Radix doesn't
+      // immediately dismiss this alert as a leftover outside click.
+      window.setTimeout(() => {
+        setWinnerName(nextWinnerName)
+      }, 150)
     }
   }
 
   function handleDeleteScore() {
-    if (!editingScoreId) {
+    if (isGameOver || !editingScoreId) {
       return
     }
 
@@ -270,7 +292,15 @@ export function App() {
     window.localStorage.removeItem(scoreEntriesStorageKey)
   }
 
+  function handleWinnerClose() {
+    setWinnerName(null)
+  }
+
   function handleUndoLastRound() {
+    if (isGameOver) {
+      return
+    }
+
     const latestRoundId = scoreEntries.at(-1)?.roundId
 
     if (!latestRoundId) {
@@ -302,6 +332,7 @@ export function App() {
         groupCount={groupCount}
         gameHistory={gameHistory}
         hasScores={scoreEntries.length > 0}
+        isGameOver={isGameOver}
         onScoreTargetChange={handleScoreTargetChange}
         onGroupCountChange={handleGroupCountChange}
         onDeleteHistory={handleDeleteHistory}
@@ -311,6 +342,7 @@ export function App() {
         groupNames={groupNames}
         scoreEntries={scoreEntries}
         scoreTarget={scoreTarget}
+        isGameOver={isGameOver}
         onAddScore={openScoreDialog}
         onEditScore={openEditScoreDialog}
       />
@@ -339,16 +371,19 @@ export function App() {
         onCancel={closeScoreDialog}
       />
 
-      {winnerName !== null && (
-        <WinnerDialog winnerName={winnerName} onRestart={handleRestart} />
-      )}
+      <WinnerDialog
+        open={winnerName !== null}
+        winnerName={winnerName ?? ""}
+        onClose={handleWinnerClose}
+        onRestart={handleRestart}
+      />
 
       <div className="fixed bottom-12 left-1/2 z-40 flex -translate-x-1/2 gap-2">
         <Button
           variant="outline"
           size="lg"
           className="h-12 px-4 text-base"
-          disabled={scoreEntries.length === 0}
+          disabled={isGameOver || scoreEntries.length === 0}
           onClick={handleUndoLastRound}
         >
           <Undo2 />

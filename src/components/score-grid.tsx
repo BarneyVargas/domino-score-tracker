@@ -8,6 +8,7 @@ type ScoreGridProps = {
   groupNames: string[]
   scoreEntries: ScoreEntry[]
   scoreTarget: number
+  isGameOver: boolean
   onAddScore: (groupIndex: number) => void
   onEditScore: (entry: ScoreEntry) => void
 }
@@ -16,6 +17,7 @@ export function ScoreGrid({
   groupNames,
   scoreEntries,
   scoreTarget,
+  isGameOver,
   onAddScore,
   onEditScore,
 }: ScoreGridProps) {
@@ -43,13 +45,16 @@ export function ScoreGrid({
             <Button
               variant="ghost"
               className="h-16 w-full flex-col gap-1 rounded-none border-0 text-base"
-              aria-label={`Add score for ${groupName}`}
+              aria-label={
+                isGameOver ? groupName : `Add score for ${groupName}`
+              }
+              disabled={isGameOver}
               onClick={() => onAddScore(index)}
             >
               <span className="text-center font-heading text-base font-medium">
                 {groupName}
               </span>
-              <Plus />
+              {!isGameOver && <Plus />}
             </Button>
 
             {groupScoreEntries.length > 0 && (
@@ -58,7 +63,8 @@ export function ScoreGrid({
                   <button
                     key={entry.id}
                     type="button"
-                    className="grid w-full grid-cols-[auto_1fr] items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    disabled={isGameOver}
+                    className="grid w-full grid-cols-[auto_1fr] items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-100"
                     onClick={() => onEditScore(entry)}
                   >
                     <span className="inline-flex min-w-7 items-center justify-center rounded-md px-2 text-sm font-medium">
