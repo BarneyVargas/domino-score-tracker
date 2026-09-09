@@ -28,11 +28,15 @@ export function OpeningAnimation() {
         isExiting ? "opacity-0" : "opacity-100"
       }`}
     >
-      <img
-        src="/opening_animation.gif"
-        alt=""
-        className="h-auto w-full max-w-sm drop-shadow-[0_0_32px_rgb(0_0_0/0.9)] dark:mix-blend-screen"
-      />
+      <div className="relative w-full max-w-sm">
+        <img
+          src="/opening_animation.gif"
+          alt=""
+          className="h-auto w-full dark:mix-blend-screen"
+        />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-[28%] bg-linear-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-[28%] bg-linear-to-l from-background to-transparent" />
+      </div>
     </div>
   )
 }
